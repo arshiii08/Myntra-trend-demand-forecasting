@@ -1,0 +1,35 @@
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from statsmodels.tsa.arima.model import ARIMA
+import numpy as np
+
+# Sample data
+data = {
+    "Year": [i for i in range(2000, 2024)],
+    "Color": ["Cerulean", "Fuchsia Rose", "True Red", "Aqua Sky", "Tigerlily", "Blue Turquoise", "Sand Dollar", 
+              "Chili Pepper", "Blue Iris", "Mimosa", "Turquoise", "Honeysuckle", "Tangerine Tango", "Emerald", 
+              "Radiant Orchid", "Marsala", "Serenity & Rose Quartz", "Greenery", "Ultra Violet", "Living Coral", 
+              "Classic Blue", "Ultimate Gray & Illuminating", "Very Peri", "Viva Magenta"]
+}
+
+df = pd.DataFrame(data)
+
+# Encoding the colors
+label_encoder = LabelEncoder()
+df['Color_Encoded'] = label_encoder.fit_transform(df['Color'])
+
+# Preparing the time series data
+ts_data = df.set_index('Year')['Color_Encoded']
+
+# Fit the ARIMA model
+model = ARIMA(ts_data, order=(1, 1, 1))
+model_fit = model.fit()
+
+# Forecast for the next 3 years
+forecast = model_fit.forecast(steps=3)
+predicted_colors_encoded = np.round(forecast).astype(int)
+
+# Decoding the predicted colors
+predicted_colors = label_encoder.inverse_transform(predicted_colors_encoded)
+
+print("Predicted colors for the next 3 years:", predicted_colors)
