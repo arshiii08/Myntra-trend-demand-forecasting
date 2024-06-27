@@ -1,0 +1,68 @@
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from statsmodels.tsa.arima.model import ARIMA
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Sample data
+data = {
+    "Year": [i for i in range(2000, 2024)],
+    "Color": ["Cerulean", "Fuchsia Rose", "True Red", "Aqua Sky", "Tigerlily", "Blue Turquoise", "Sand Dollar", 
+              "Chili Pepper", "Blue Iris", "Mimosa", "Turquoise", "Honeysuckle", "Tangerine Tango", "Emerald", 
+              "Radiant Orchid", "Marsala", "Serenity & Rose Quartz", "Greenery", "Ultra Violet", "Living Coral", 
+              "Classic Blue", "Ultimate Gray & Illuminating", "Very Peri", "Viva Magenta"]
+}
+
+df = pd.DataFrame(data)
+
+# Encoding the colors
+label_encoder = LabelEncoder()
+df['Color_Encoded'] = label_encoder.fit_transform(df['Color'])
+
+# Preparing the time series data
+ts_data = df.set_index('Year')['Color_Encoded']
+
+# Fit the ARIMA model
+model = ARIMA(ts_data, order=(1, 1, 1))
+model_fit = model.fit()
+
+# Forecast for next 3 years
+forecast = model_fit.forecast(steps=3)
+predicted_colors_encoded = np.round(forecast).astype(int)
+
+# Decoding the predicted colors
+predicted_colors = label_encoder.inverse_transform(predicted_colors_encoded)
+
+# Creating a DataFrame for forecasted values
+future_years = [2024, 2025, 2026]
+forecast_df = pd.DataFrame({
+    'Year': future_years,
+    'Color_Encoded': predicted_colors_encoded,
+    'Color': predicted_colors
+})
+
+# Combining historical and forecasted data for plotting
+combined_df = pd.concat([df, forecast_df], ignore_index=True)
+
+# Plotting
+plt.figure(figsize=(14, 7))
+
+# Plot historical data
+sns.lineplot(x='Year', y='Color_Encoded', data=df, marker='o', label='Historical Data', color='blue')
+
+# Plot forecasted data
+sns.lineplot(x='Year', y='Color_Encoded', data=forecast_df, marker='o', label='Forecasted Data', color='red')
+
+# Annotate colors
+for i in range(len(combined_df)):
+    plt.annotate(combined_df['Color'][i], 
+                 (combined_df['Year'][i], combined_df['Color_Encoded'][i]), 
+                 textcoords="offset points", xytext=(0,10), ha='center',
+                 color='red' if combined_df['Year'][i] in future_years else 'blue')
+
+plt.title('Fashion Color Trends (2000-2026)')
+plt.xlabel('Year')
+plt.ylabel('Color (Encoded)')
+plt.legend()
+plt.show()
