@@ -7,6 +7,8 @@ A real-time AI-based forecasting solution to predict fast fashion demand accurat
 - **Arshia Moudgil**   
 - **Ojasvi Padhiar**
 
+---
+
 ## 🔍 Solution Overview
 
 We leverage **real-time data** and **machine learning models (LSTM & SARIMAX)** to forecast trending fashion attributes like **colors** and **themes**. This enables better demand prediction and smarter inventory management.
